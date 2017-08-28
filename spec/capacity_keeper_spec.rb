@@ -8,7 +8,7 @@ describe CapacityKeeper do
 
   describe 'VERSION' do
     it 'should have a correct version number' do
-      expect(CapacityKeeper::VERSION).to eq('0.0.1')
+      expect(CapacityKeeper::VERSION).to eq('0.0.2')
     end
   end
 
@@ -28,12 +28,12 @@ describe CapacityKeeper do
     end
   end
 
-  describe '#add_keeper' do
+  describe '#add_plugin' do
     subject {
       instance.
-      send(:with_capacity, opts: opts).
-      send(:add_keeper, keeper: ExampleKeeper).
-      send(:add_keeper, keeper: OtherKeeper) { block_result }
+      send(:within_capacity, opts: opts).
+      send(:add_plugin, ExampleKeeper).
+      send(:add_plugin, OtherKeeper) { block_result }
     }
 
     let(:instance) { include_class.new }
@@ -46,19 +46,19 @@ describe CapacityKeeper do
     describe 'retry and exec' do
       let(:opts) { { var: 1, var_required: "abc" } }
 
-      context 'when capacity is satisfied' do
+      context 'when capacity is reservable' do
         it 'should be exected immediately' do
           expect_any_instance_of(Kernel).not_to receive(:sleep)
-          expect_any_instance_of(ExampleKeeper).to receive(:reduce_capacity)
-          expect_any_instance_of(OtherKeeper).to receive(:reduce_capacity)
-          expect_any_instance_of(ExampleKeeper).to receive(:gain_capacity)
-          expect_any_instance_of(OtherKeeper).to receive(:gain_capacity)
+          expect_any_instance_of(ExampleKeeper).to receive(:deposit)
+          expect_any_instance_of(OtherKeeper).to receive(:deposit)
+          expect_any_instance_of(ExampleKeeper).to receive(:reposit)
+          expect_any_instance_of(OtherKeeper).to receive(:reposit)
           is_expected.to eq(block_result)
         end
       end
 
-      context 'when capacity is not satisfied and over retry limit' do
-        let(:retry_occured_configs) { { satisfied_str: "not_satisfied" } }
+      context 'when capacity is not reservable and over retry limit' do
+        let(:retry_occured_configs) { { reservable_str: "not_reservable" } }
 
         context 'when raise_on_retry_fail is true' do
           let(:opts) { { var: 1, var_required: "abc" }.merge(merge_configs) }

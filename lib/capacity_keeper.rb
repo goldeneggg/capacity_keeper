@@ -3,51 +3,59 @@ require 'capacity_keeper/errors'
 require 'capacity_keeper/config'
 require 'capacity_keeper/pluggable'
 require 'capacity_keeper/plugin'
-require 'capacity_keeper/plugin/simple_counter'
+require 'capacity_keeper/plugins/simple_counter'
 
 module CapacityKeeper
-  include CapacityKeeper::Errors
 
   def self.configure
     yield Config
   end
 
-  def with_capacity(keeper: nil, opts: {}, &block)
-    keepers = Keepers.new(opts: opts)
-    keepers.add_keeper(keeper: keeper) unless keeper.nil?
+  # @param [Class] plugin plugin class
+  # @param [Hash] opts runtime options
+  # @return [CapacityKeeper::Keepers]
+  def within_capacity(plugin: nil, opts: {}, &block)
+    keepers = Keepers.new(opts)
+    keepers.add_plugin(plugin) unless plugin.nil?
 
-    return keepers.exec(&block) if block_given?
+    return keepers.perform(&block) if block_given?
 
     keepers
   end
 
   class Keepers
-    def initialize(opts: {})
-      @keepers = []
+    def initialize(opts = {})
+      @plugins = []
       @opts = opts
     end
 
-    def add_keeper(keeper:, &block)
-      @keepers << keeper.new(opts: @opts)
+    # @param [Class] plugin plugin class
+    def add_plugin(plugin, &block)
+      @plugins << plugin.new(opts: @opts)
 
-      return exec(&block) if block_given?
+      return perform(&block) if block_given?
 
       self
     end
 
-    def exec
+    # @return [Object] some return object from assigned block
+    def perform
       wait_retry
 
       begin
-        @keepers.each do |keeper|
-          keeper.reduce_capacity
-          keeper.log_verbose("complete reduce capacity")
+        @plugins.each do |plugin|
+          plugin.deposit
+          plugin.log_verbose("deposit")
         end
         yield
       ensure
-        @keepers.each do |keeper|
-          keeper.gain_capacity
-          keeper.log_verbose("complete gain capacity")
+        @plugins.each do |plugin|
+          begin
+            plugin.reposit
+            plugin.log_verbose("reposit")
+          rescue => ex
+            plugin.log_verbose("failed to reposit. exception:#{ex.class.name}, message:#{ex.message}")
+          end
         end
       end
     end
@@ -55,27 +63,25 @@ module CapacityKeeper
     private
 
     def wait_retry
-      @keepers.each do |keeper|
-        keeper.log_verbose("start wait_retry")
+      @plugins.each do |plugin|
+        plugin.log_verbose("start wait_retry of plugin:#{plugin.name}")
 
-        satisfied = false
-        keeper.retry_count.times do
-          if keeper.satisfied?
-            satisfied = true
-            keeper.log_verbose("satisfied")
+        reservable = false
+        plugin.retry_count.times do
+          if plugin.reservable?
+            reservable = true
+            plugin.log_verbose("ok reservable")
             break
           end
-          keeper.log_verbose("sleep for #{keeper.retry_sleep_second} second")
-          sleep(keeper.retry_sleep_second)
+          plugin.log_verbose("sleep for #{plugin.retry_sleep_second} second from now on")
+          sleep(plugin.retry_sleep_second)
         end
-        keeper.log_verbose("break retry loop")
-        next if satisfied
+        plugin.log_verbose("break retry loop. reservable=#{reservable}")
+        next if reservable
 
-        if keeper.raise_on_retry_fail?
-          raise ::CapacityKeeper::Errors::OverRetryLimitError.new("#{keeper.name}: failed to capacity check")
+        if plugin.raise_on_retry_fail?
+          raise ::CapacityKeeper::Errors::OverRetryLimitError.new("#{plugin.name}: failed to capacity check")
         end
-
-        keeper.log_verbose("end wait_retry")
       end
     end
   end
