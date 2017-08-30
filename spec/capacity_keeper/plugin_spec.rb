@@ -3,7 +3,7 @@ require 'spec_helper'
 describe CapacityKeeper::Plugin do
   let(:plugin) { ExampleKeeper.new(opts: opts) }
   let(:opts) { valid_opts }
-  let(:valid_opts) { { default_is_nil: 'a', satisfied_str: 'test' } }
+  let(:valid_opts) { { default_is_nil: 'a', reservable_str: 'test' } }
 
   describe '#initialize' do
     context 'when not have undefined key' do
@@ -16,17 +16,17 @@ describe CapacityKeeper::Plugin do
     end
   end
 
-  describe '#reduce_capacity' do
+  describe '#deposit' do
     it 'should change capacity state' do
-      plugin.reduce_capacity
-      expect(plugin.class.class_variable_get(:@@state)).to eq('reduce_capacity')
+      plugin.deposit
+      expect(plugin.class.class_variable_get(:@@state)).to eq('deposit')
     end
   end
 
-  describe '#gain_capacity' do
+  describe '#reposit' do
     it 'should change capacity state' do
-      plugin.gain_capacity
-      expect(plugin.class.class_variable_get(:@@state)).to eq(plugin.configs[:satisfied_str])
+      plugin.reposit
+      expect(plugin.class.class_variable_get(:@@state)).to eq(plugin.configs[:reservable_str])
     end
   end
 

@@ -8,15 +8,18 @@ module CapacityKeeper
       merge_configs(@opts)
     end
 
-    def satisfied?
+    # @return [Boolegn] if block is executable, then return true
+    def reservable?
       raise NotImplementedError.new("must be override")
     end
 
-    def reduce_capacity
+    # before block execution
+    def deposit
       raise NotImplementedError.new("must be override")
     end
 
-    def gain_capacity
+    # after block execution
+    def reposit
       raise NotImplementedError.new("must be override")
     end
   end

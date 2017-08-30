@@ -15,7 +15,7 @@ innocent_method(value)
 ↓ By using `capacity_keeper gem`, this may change to be system-friendly
 
 ```ruby
-with_capacity(keeper: ExampleKeeper) do
+within_capacity(plugin: TestPlugin) do
   innocent_method(value)
 end
 ```
@@ -40,14 +40,15 @@ Or install it yourself as:
 
 ## Simple Usage
 
-Your plugin class must be inherit `Capacitykeeper::Plugin` class,
-and override `satisfied?`, `reduce_capacity` and `gain_capacity` abstract methods.
+First, you need to implement plugin class of capacity_keeper.
+Your plugin class must be inherit `CapacityKeeper::Plugin` class,
+and override `reservable?`, `deposit` and `reposit` abstract methods.
 
 Example of plugin implementation as follows
 
 ```ruby
-# Capacitykeeper::Plugin must be inherited.
-class TestCapacityKeeperPlugin < Capacitykeeper::Plugin
+# CapacityKeeper::Plugin must be inherited.
+class TestPlugin < CapacityKeeper::Plugin
 
   # Define configs
   config :max, 10
@@ -55,33 +56,39 @@ class TestCapacityKeeperPlugin < Capacitykeeper::Plugin
   @@counter = 0
 
   # @override
-  def satisfied?
+  def reservable?
+    # check current counter is not over max value
     @@counter <= configs[:max]
   end
 
   # @override
-  def reduce_capacity
+  def deposit
+    # enqueue counter
     @@counter += 1
   end
 
   # @override
-  def gain_capacity
+  def reposit
+    # dequeue counter
     @@counter -= 1 if @@counter > 0
   end
 end
 ```
 
-If your process need to keep capacity, include `CapacityKeeper` module, and use `with_capacity` method
+If your process need to keep capacity, include `CapacityKeeper` module, and use `within_capacity` method
 
 ```ruby
 require 'capacity_keeper'
 
 class Example
+  # must be included CapacityKeeper module
   include CapacityKeeper
 
   def xxx
-    with_capacity(keeper: TestCapacityKeeperPlugin) do
-      some codes
+    # enclose with within_capacity method, and assign plugin class for keeping capacity
+    within_capacity(plugin: TestPlugin) do
+      # some system-unfriendly method
+      innocent_method
     end
   end
 end
@@ -89,16 +96,16 @@ end
 
 ### Exection sequence
 
-1. Execute `satisfied?` of your plugin implementation for capacity satisfation check
-1. If satisfied,
-    1. Execute `reduce_capacity` of your plugin implementation hook
-    1. Execute your assigned block
-    1. Execute `gain_capacity` of your plugin implementation hook
+1. Execute `reservable?` of your plugin implementation for capacity satisfation check
+1. If reservable,
+    1. Execute `deposit` of your plugin implementation
+    1. __Execute your assigned block__
+    1. Execute `reposit` of your plugin implementation
 
 
 ## Use runtime options
 
-If your plugin class want to refer `@opts` variable, please assign `opts` argument of `with_capacity` method calling.
+If your plugin class want to refer `@opts` variable, please assign `opts` argument of `within_capacity` method calling.
 
 ```ruby
 require 'capacity_keeper'
@@ -107,8 +114,8 @@ class Example
   include CapacityKeeper
 
   def xxx
-    with_capacity(keeper: TestCapacityKeeperPlugin, opts: { hello: 'world' }) do
-      some codes
+    within_capacity(plugin: TestPlugin, opts: { hello: 'world' }) do
+      innocent_method
     end
   end
 end
@@ -117,61 +124,83 @@ end
 `@opts` variable can be refered from your plugin class.
 
 ```ruby
-class TestCapacityKeeperPlugin < Capacitykeeper::Plugin
+class TestPlugin < CapacityKeeper::Plugin
 
   option :max, 10
 
   @@counter = 0
 
   # @override
-  def satisfied?
+  def reservable?
     puts @opts.inspect  # @opts variable can be refered => { hello: 'world' }
     @@counter <= options[:max]
   end
 
   # @override
-  def reduce_capacity
+  def deposit
     @@counter += 1
   end
 
   # @override
-  def gain_capacity
+  def reposit
     @@counter -= 1 if @@counter > 0
   end
 end
 ```
 
 
-## Keep with multi keepers
+## Capacity keeping with multi plugins
 
-You can use multi keepers by calling `add_capacity` method.
+You can assign multi plugins by calling `add_plugin` method.
 
 ```ruby
-with_capacity(keeper: KeeperA).add_keeper(keeper: KeeperB).add_keeper(keeper: KeeperC) do
+within_capacity(plugin: PluginA).add_plugin(PluginB).add_plugin(PluginC) do
+  # applied PluginA and PluginB and PluginC
   innocent_method(value)
 end
 ```
 
 ### Exection sequence
 
-1. Execute `satisfied?` of KeeperA for capacity satisfation check
-1. Execute `satisfied?` of KeeperB for capacity satisfation check
-1. Execute `satisfied?` of KeeperC for capacity satisfation check
-1. If satisfied,
-    1. Execute `reduce_capacity` of KeeperA hook
-    1. Execute `reduce_capacity` of KeeperB hook
-    1. Execute `reduce_capacity` of KeeperC hook
-    1. Execute your assigned block
-    1. Execute `gain_capacity` of KeeperA hook
-    1. Execute `gain_capacity` of KeeperB hook
-    1. Execute `gain_capacity` of KeeperC hook
+1. Execute `reservable?` of PluginA for capacity satisfation check
+1. Execute `reservable?` of PluginB for capacity satisfation check
+1. Execute `reservable?` of PluginC for capacity satisfation check
+1. If reservable on all plugins,
+    1. Execute `deposit` of PluginA
+    1. Execute `deposit` of PluginB
+    1. Execute `deposit` of PluginC
+    1. __Execute your assigned block__
+    1. Execute `reposit` of PluginA
+    1. Execute `reposit` of PluginB
+    1. Execute `reposit` of PluginC
+
+### Add some plugins under specific conditions
+
+if you want to add some plugins under specific conditions, you can use `CapacityKeeper::Keepers#perform` method.
+
+```ruby
+str = 'C'
+
+keepers = within_capacity(plugin: PluginA)
+if str == 'B'
+  keepers.add_plugin(PluginB)
+end
+if str == 'C'
+  keepers.add_plugin(PluginC)
+end
+
+keepers.perform do
+  # applied PluginA and PluginC
+  innocent_method(value)
+end
+```
 
 
 ## Configurations
-Default keeper configuration on your app using `Capacitykeeper.configure`
+Default keeper configuration on your app using `CapacityKeeper.configure`
 
 ```ruby
-Capacitykeeper.configure do |config|
+CapacityKeeper.configure do |config|
   config.retry_count = 5
 
   config.retry_sleep_second = 5
