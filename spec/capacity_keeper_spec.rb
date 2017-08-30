@@ -8,7 +8,7 @@ describe CapacityKeeper do
 
   describe 'VERSION' do
     it 'should have a correct version number' do
-      expect(CapacityKeeper::VERSION).to eq('0.0.2')
+      expect(CapacityKeeper::VERSION).to eq('0.0.1')
     end
   end
 
