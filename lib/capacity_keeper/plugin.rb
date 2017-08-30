@@ -5,21 +5,20 @@ module CapacityKeeper
 
     def initialize(opts: {})
       @opts = opts
-      merge_configs(@opts)
     end
 
     # @return [Boolegn] if block is executable, then return true
-    def reservable?
+    def performable?
       raise NotImplementedError.new("must be override")
     end
 
     # before block execution
-    def deposit
+    def lock
       raise NotImplementedError.new("must be override")
     end
 
     # after block execution
-    def reposit
+    def unlock
       raise NotImplementedError.new("must be override")
     end
   end

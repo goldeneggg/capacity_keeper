@@ -9,14 +9,14 @@ __WIP__
 If this method call is system-unfriendly
 
 ```ruby
-innocent_method(value)
+innocent_method
 ```
 
 ↓ By using `capacity_keeper gem`, this may change to be system-friendly
 
 ```ruby
 within_capacity(plugin: TestPlugin) do
-  innocent_method(value)
+  innocent_method
 end
 ```
 
@@ -42,7 +42,7 @@ Or install it yourself as:
 
 First, you need to implement plugin class of capacity_keeper.
 Your plugin class must be inherit `CapacityKeeper::Plugin` class,
-and override `reservable?`, `deposit` and `reposit` abstract methods.
+and override `performable?`, `lock` and `unlock` abstract methods.
 
 Example of plugin implementation as follows
 
@@ -50,25 +50,25 @@ Example of plugin implementation as follows
 # CapacityKeeper::Plugin must be inherited.
 class TestPlugin < CapacityKeeper::Plugin
 
-  # Define configs
+  # Define class original configs
   config :max, 10
 
   @@counter = 0
 
   # @override
-  def reservable?
+  def performable?
     # check current counter is not over max value
     @@counter <= configs[:max]
   end
 
   # @override
-  def deposit
+  def lock
     # enqueue counter
     @@counter += 1
   end
 
   # @override
-  def reposit
+  def unlock
     # dequeue counter
     @@counter -= 1 if @@counter > 0
   end
@@ -96,11 +96,11 @@ end
 
 ### Exection sequence
 
-1. Execute `reservable?` of your plugin implementation for capacity satisfation check
-1. If reservable,
-    1. Execute `deposit` of your plugin implementation
+1. Execute `performable?` of your plugin implementation for capacity satisfation check
+1. If performable,
+    1. Execute `lock` of your plugin implementation
     1. __Execute your assigned block__
-    1. Execute `reposit` of your plugin implementation
+    1. Execute `unlock` of your plugin implementation
 
 
 ## Use runtime options
@@ -126,23 +126,23 @@ end
 ```ruby
 class TestPlugin < CapacityKeeper::Plugin
 
-  option :max, 10
+  config :max, 10
 
   @@counter = 0
 
   # @override
-  def reservable?
+  def performable?
     puts @opts.inspect  # @opts variable can be refered => { hello: 'world' }
-    @@counter <= options[:max]
+    @@counter <= configs[:max]
   end
 
   # @override
-  def deposit
+  def lock
     @@counter += 1
   end
 
   # @override
-  def reposit
+  def unlock
     @@counter -= 1 if @@counter > 0
   end
 end
@@ -156,23 +156,23 @@ You can assign multi plugins by calling `add_plugin` method.
 ```ruby
 within_capacity(plugin: PluginA).add_plugin(PluginB).add_plugin(PluginC) do
   # applied PluginA and PluginB and PluginC
-  innocent_method(value)
+  innocent_method
 end
 ```
 
 ### Exection sequence
 
-1. Execute `reservable?` of PluginA for capacity satisfation check
-1. Execute `reservable?` of PluginB for capacity satisfation check
-1. Execute `reservable?` of PluginC for capacity satisfation check
-1. If reservable on all plugins,
-    1. Execute `deposit` of PluginA
-    1. Execute `deposit` of PluginB
-    1. Execute `deposit` of PluginC
+1. Execute `performable?` of PluginA for capacity satisfation check
+1. Execute `performable?` of PluginB for capacity satisfation check
+1. Execute `performable?` of PluginC for capacity satisfation check
+1. If performable on all plugins,
+    1. Execute `lock` of PluginA
+    1. Execute `lock` of PluginB
+    1. Execute `lock` of PluginC
     1. __Execute your assigned block__
-    1. Execute `reposit` of PluginA
-    1. Execute `reposit` of PluginB
-    1. Execute `reposit` of PluginC
+    1. Execute `unlock` of PluginA
+    1. Execute `unlock` of PluginB
+    1. Execute `unlock` of PluginC
 
 ### Add some plugins under specific conditions
 
@@ -191,7 +191,7 @@ end
 
 keepers.perform do
   # applied PluginA and PluginC
-  innocent_method(value)
+  innocent_method
 end
 ```
 
@@ -203,7 +203,7 @@ Default keeper configuration on your app using `CapacityKeeper.configure`
 CapacityKeeper.configure do |config|
   config.retry_count = 5
 
-  config.retry_sleep_second = 5
+  config.retry_interval_second = 5
 
   config.raise_on_retry_fail = false
 
@@ -212,6 +212,23 @@ CapacityKeeper.configure do |config|
   config.verbose = false
 end
 ```
+
+Override class original configs
+
+```ruby
+class TestPlugin < CapacityKeeper::Plugin
+
+  # Override default configs by class original values
+  retry_count 10
+  retry_interval_second 10
+  raise_on_retry_fail true
+  logger TestLogger.new
+  verbose true
+
+:
+:
+```
+
 
 
 ## Development

@@ -1,32 +1,33 @@
 require 'spec_helper'
 
 describe CapacityKeeper::Plugin do
-  let(:plugin) { ExampleKeeper.new(opts: opts) }
+  let(:plugin) { DefaultConfigKeeper.new(opts: opts) }
+  let(:plugin2) { OtherKeeper.new(opts: opts) }
   let(:opts) { valid_opts }
-  let(:valid_opts) { { default_is_nil: 'a', reservable_str: 'test' } }
+  let(:valid_opts) { { performable_str: 'test' } }
 
   describe '#initialize' do
     context 'when not have undefined key' do
       it 'should be initialized correctly' do
         ms = plugin.class.singleton_methods
-        expect(ms.size).to eq(3)  # Targets are 2 gem methods + "yaml_tag" methods
+        expect(ms.size).to eq(8)
         expect(ms.include?(:configs)).to be_truthy
         expect(ms.include?(:config)).to be_truthy
       end
     end
   end
 
-  describe '#deposit' do
+  describe '#lock' do
     it 'should change capacity state' do
-      plugin.deposit
-      expect(plugin.class.class_variable_get(:@@state)).to eq('deposit')
+      plugin.lock
+      expect(plugin.class.class_variable_get(:@@state)).to eq('lock')
     end
   end
 
-  describe '#reposit' do
+  describe '#unlock' do
     it 'should change capacity state' do
-      plugin.reposit
-      expect(plugin.class.class_variable_get(:@@state)).to eq(plugin.configs[:reservable_str])
+      plugin.unlock
+      expect(plugin.class.class_variable_get(:@@state)).to eq(plugin.configs[:performable_str])
     end
   end
 
@@ -34,57 +35,66 @@ describe CapacityKeeper::Plugin do
     subject{ plugin.name }
 
     it 'should be returned class name' do
-      expect(subject).to eq('ExampleKeeper')
+      expect(subject).to eq('DefaultConfigKeeper')
     end
   end
 
   describe '#retry_count' do
-    subject{ plugin.retry_count }
+    subject{ test_plugin.retry_count }
 
-    context 'when not assigned initializer' do
+    context 'when plugin is DefaultConfigKeeper' do
+      let(:test_plugin) { plugin }
+
       it 'should be returned default value' do
         expect(subject).to eq(CapacityKeeper::Config.retry_count)
       end
     end
 
-    context 'when assigned initializer' do
-      let(:opts) { valid_opts.merge({ retry_count: 20 })}
-      it 'should be returned overrided value' do
-        expect(subject).to eq(opts[:retry_count])
+    context 'when plugin is OtherKeeper' do
+      let(:test_plugin) { plugin2 }
+
+      it 'should be returned assigned config value' do
+        expect(subject).to eq(10)
       end
     end
   end
 
-  describe '#retry_sleep_second' do
-    subject{ plugin.retry_sleep_second }
+  describe '#retry_interval_second' do
+    subject{ test_plugin.retry_interval_second }
 
-    context 'when not assigned initializer' do
+    context 'when plugin is DefaultConfigKeeper' do
+      let(:test_plugin) { plugin }
+
       it 'should be returned default value' do
-        expect(subject).to eq(CapacityKeeper::Config.retry_sleep_second)
+        expect(subject).to eq(CapacityKeeper::Config.retry_interval_second)
       end
     end
 
-    context 'when assigned initializer' do
-      let(:opts) { valid_opts.merge({ retry_sleep_second: 15 })}
-      it 'should be returned overrided value' do
-        expect(subject).to eq(opts[:retry_sleep_second])
+    context 'when plugin is OtherKeeper' do
+      let(:test_plugin) { plugin2 }
+
+      it 'should be returned assigned config value' do
+        expect(subject).to eq(10)
       end
     end
   end
 
   describe '#raise_on_retry_fail?' do
-    subject{ plugin.raise_on_retry_fail? }
+    subject{ test_plugin.raise_on_retry_fail? }
 
-    context 'when not assigned initializer' do
+    context 'when plugin is DefaultConfigKeeper' do
+      let(:test_plugin) { plugin }
+
       it 'should be returned default value' do
         expect(subject).to eq(CapacityKeeper::Config.raise_on_retry_fail)
       end
     end
 
-    context 'when assigned initializer' do
-      let(:opts) { valid_opts.merge({ raise_on_retry_fail: true })}
-      it 'should be returned overrided value' do
-        expect(subject).to eq(opts[:raise_on_retry_fail])
+    context 'when plugin is OtherKeeper' do
+      let(:test_plugin) { plugin2 }
+
+      it 'should be returned assigned config value' do
+        expect(subject).to eq(true)
       end
     end
   end
@@ -92,43 +102,47 @@ describe CapacityKeeper::Plugin do
   describe '#logger' do
     subject{ plugin.logger }
 
-    context 'when not assigned initializer' do
-      it 'should be returned default value' do
-        expect(subject).to eq(CapacityKeeper::Config.logger)
-      end
-    end
-
-    context 'when assigned initializer' do
-      let(:opts) { valid_opts.merge({ logger: ::Logger.new(STDERR) })}
-      it 'should be returned overrided value' do
-        expect(subject).to eq(opts[:logger])
-      end
+    it 'should be returned default value' do
+      expect(subject).to eq(CapacityKeeper::Config.logger)
     end
   end
 
   describe '#verbose?' do
-    subject{ plugin.verbose? }
+    subject{ test_plugin.verbose? }
 
-    context 'when not assigned initializer' do
+    context 'when plugin is DefaultConfigKeeper' do
+      let(:test_plugin) { plugin }
+
       it 'should be returned default value' do
         expect(subject).to eq(CapacityKeeper::Config.verbose)
       end
     end
 
-    context 'when assigned initializer' do
-      let(:opts) { valid_opts.merge({ verbose: true })}
-      it 'should be returned overrided value' do
-        expect(subject).to eq(opts[:verbose])
+    context 'when plugin is OtherKeeper' do
+      let(:test_plugin) { plugin2 }
+
+      it 'should be returned assigned config value' do
+        expect(subject).to eq(true)
       end
     end
   end
 
   describe '#configs' do
-    subject{ plugin.configs }
+    subject{ test_plugin.configs }
 
-    context 'when not assigned initializer' do
-      it 'should be returned default value' do
-        expect(subject).to eq(plugin.class.configs.merge(valid_opts))
+    context 'when plugin is DefaultConfigKeeper' do
+      let(:test_plugin) { plugin }
+
+      it 'should be returned class configs' do
+        expect(subject).to eq(test_plugin.class.configs)
+      end
+    end
+
+    context 'when plugin is OtherKeeper' do
+      let(:test_plugin) { plugin2 }
+
+      it 'should be returned class configs' do
+        expect(subject).to eq(test_plugin.class.configs)
       end
     end
   end
