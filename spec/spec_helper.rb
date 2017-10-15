@@ -3,48 +3,53 @@ require 'capacity_keeper'
 
 require 'pry'
 
-class ExampleKeeper < CapacityKeeper::Plugin
+class DefaultConfigKeeper < CapacityKeeper::Plugin
 
-  config :default_is_nil
-  config :reservable_str, "test"
+  config :performable_str, "test"
 
   @@state = "test"
 
   # @override
-  def reservable?
-    @@state == configs[:reservable_str]
+  def performable?
+    runtime_state = @opts[:performable_str] || configs[:performable_str]
+    @@state == runtime_state
   end
 
   # @override
-  def deposit
-    @@state = "deposit"
+  def lock
+    @@state = "lock"
   end
 
   # @override
-  def reposit
-    @@state = configs[:reservable_str]
+  def unlock
+    @@state = configs[:performable_str]
   end
 end
 
 class OtherKeeper < CapacityKeeper::Plugin
 
-  config :default_is_nil
-  config :reservable_str, "test"
+  retry_count 10
+  retry_interval_second 10
+  raise_on_retry_fail true
+  verbose true
+
+  config :performable_str, "test"
 
   @@state = "test"
 
   # @override
-  def reservable?
-    @@state == configs[:reservable_str]
+  def performable?
+    runtime_state = @opts[:performable_str] || configs[:performable_str]
+    @@state == runtime_state
   end
 
   # @override
-  def deposit
-    @@state = "deposit"
+  def lock
+    @@state = "lock"
   end
 
   # @override
-  def reposit
-    @@state = configs[:reservable_str]
+  def unlock
+    @@state = configs[:performable_str]
   end
 end

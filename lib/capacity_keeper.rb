@@ -44,17 +44,17 @@ module CapacityKeeper
 
       begin
         @plugins.each do |plugin|
-          plugin.deposit
-          plugin.log_verbose("deposit")
+          plugin.lock
+          plugin.log_verbose("lock")
         end
         yield
       ensure
         @plugins.each do |plugin|
           begin
-            plugin.reposit
-            plugin.log_verbose("reposit")
+            plugin.unlock
+            plugin.log_verbose("unlock")
           rescue => ex
-            plugin.log_verbose("failed to reposit. exception:#{ex.class.name}, message:#{ex.message}")
+            plugin.log_verbose("failed to unlock. exception:#{ex.class.name}, message:#{ex.message}")
           end
         end
       end
@@ -66,18 +66,18 @@ module CapacityKeeper
       @plugins.each do |plugin|
         plugin.log_verbose("start wait_retry of plugin:#{plugin.name}")
 
-        reservable = false
+        performable = false
         plugin.retry_count.times do
-          if plugin.reservable?
-            reservable = true
-            plugin.log_verbose("ok reservable")
+          if plugin.performable?
+            performable = true
+            plugin.log_verbose("ok performable")
             break
           end
-          plugin.log_verbose("sleep for #{plugin.retry_sleep_second} second from now on")
-          sleep(plugin.retry_sleep_second)
+          plugin.log_verbose("sleep for #{plugin.retry_interval_second} second from now on")
+          sleep(plugin.retry_interval_second)
         end
-        plugin.log_verbose("break retry loop. reservable=#{reservable}")
-        next if reservable
+        plugin.log_verbose("break retry loop. performable=#{performable}")
+        next if performable
 
         if plugin.raise_on_retry_fail?
           raise ::CapacityKeeper::Errors::OverRetryLimitError.new("#{plugin.name}: failed to capacity check")

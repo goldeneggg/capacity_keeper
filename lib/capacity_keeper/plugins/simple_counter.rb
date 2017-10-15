@@ -6,18 +6,22 @@ module CapacityKeeper::Plugins
     @@counter = 0
 
     # @override
-    def reservable?
+    def performable?
       @@counter <= configs[:max]
     end
 
     # @override
-    def deposit
+    def lock
       @@counter += 1
     end
 
     # @override
-    def reposit
+    def unlock
       @@counter -= 1 if @@counter > 0
+    end
+
+    def self.counter
+      @@counter
     end
   end
 end

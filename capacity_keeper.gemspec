@@ -9,8 +9,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["goldeneggg"]
   spec.email         = ["jpshadowapps@gmail.com"]
 
-  spec.summary       = %q{Write a short summary, because Rubygems requires one.}
-  spec.description   = %q{Write a longer description or delete this line.}
+  spec.summary       = %q{simple and pluggable capacity keeping tool for your processes}
+  spec.description   = %q{simple and pluggable capacity keeping tool for your processes}
   spec.homepage      = "https://github.com/goldeneggg/capacity_keeper"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'

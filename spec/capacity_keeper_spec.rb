@@ -8,7 +8,7 @@ describe CapacityKeeper do
 
   describe 'VERSION' do
     it 'should have a correct version number' do
-      expect(CapacityKeeper::VERSION).to eq('0.0.1')
+      expect(CapacityKeeper::VERSION).to eq('0.0.2')
     end
   end
 
@@ -32,7 +32,7 @@ describe CapacityKeeper do
     subject {
       instance.
       send(:within_capacity, opts: opts).
-      send(:add_plugin, ExampleKeeper).
+      send(:add_plugin, DefaultConfigKeeper).
       send(:add_plugin, OtherKeeper) { block_result }
     }
 
@@ -44,39 +44,25 @@ describe CapacityKeeper do
     end
 
     describe 'retry and exec' do
-      let(:opts) { { var: 1, var_required: "abc" } }
+      let(:opts) { { var: 1 } }
 
-      context 'when capacity is reservable' do
+      context 'when capacity is performable' do
         it 'should be exected immediately' do
           expect_any_instance_of(Kernel).not_to receive(:sleep)
-          expect_any_instance_of(ExampleKeeper).to receive(:deposit)
-          expect_any_instance_of(OtherKeeper).to receive(:deposit)
-          expect_any_instance_of(ExampleKeeper).to receive(:reposit)
-          expect_any_instance_of(OtherKeeper).to receive(:reposit)
+          expect_any_instance_of(DefaultConfigKeeper).to receive(:lock)
+          expect_any_instance_of(OtherKeeper).to receive(:lock)
+          expect_any_instance_of(DefaultConfigKeeper).to receive(:unlock)
+          expect_any_instance_of(OtherKeeper).to receive(:unlock)
           is_expected.to eq(block_result)
         end
       end
 
-      context 'when capacity is not reservable and over retry limit' do
-        let(:retry_occured_configs) { { reservable_str: "not_reservable" } }
+      context 'when capacity is not performable' do
+        let(:opts) { { var: 1, performable_str: 'not_performable' } }
 
-        context 'when raise_on_retry_fail is true' do
-          let(:opts) { { var: 1, var_required: "abc" }.merge(merge_configs) }
-          let(:merge_configs) { retry_occured_configs.merge({ raise_on_retry_fail: true }) }
-
-          it 'should be raised error' do
-            expect_any_instance_of(Kernel).to receive(:sleep).at_least(:once)
-            expect{ subject }.to raise_error(CapacityKeeper::Errors::OverRetryLimitError)
-          end
-        end
-
-        context 'when raise_on_retry_fail is false' do
-          let(:opts) { { var: 1, var_required: "abc" }.merge(merge_configs) }
-          let(:merge_configs) { retry_occured_configs }
-          it 'should be exected with sleep' do
-            expect_any_instance_of(Kernel).to receive(:sleep).at_least(:once)
-            is_expected.to eq(block_result)
-          end
+        it 'should be raised error' do
+          expect_any_instance_of(Kernel).to receive(:sleep).at_least(:once)
+          expect{ subject }.to raise_error(CapacityKeeper::Errors::OverRetryLimitError)
         end
       end
     end
