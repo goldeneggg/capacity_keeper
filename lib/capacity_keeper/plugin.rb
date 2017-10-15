@@ -3,6 +3,7 @@ module CapacityKeeper
     include CapacityKeeper::Pluggable
     include CapacityKeeper::Errors
 
+    # @param [Hash] some options
     def initialize(opts: {})
       @opts = opts
     end
@@ -13,12 +14,16 @@ module CapacityKeeper
     end
 
     # before block execution
+    #
+    # @return [Object] result of begin_process method
     def before
       @beginning = true
       begin_process
     end
 
     # after block execution
+    #
+    # @return [Object] if beginning? then result of finish_process method, else nil
     def after
       if beginning?
         @beginning = false
@@ -26,6 +31,7 @@ module CapacityKeeper
       end
     end
 
+    # @return [Boolegn] if before was called and after is not called, then return true
     def beginning?
       @beginning || false
     end

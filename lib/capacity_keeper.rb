@@ -7,6 +7,7 @@ require 'capacity_keeper/plugins/simple_counter'
 
 module CapacityKeeper
 
+  # setup configurations
   def self.configure
     yield Config
   end
@@ -24,6 +25,7 @@ module CapacityKeeper
   end
 
   class Keepers
+    # @param [Hash] opts runtime options
     def initialize(opts = {})
       @plugins = []
       @opts = opts

@@ -48,7 +48,7 @@ Example of plugin implementation as follows
 
 ```ruby
 # CapacityKeeper::Plugin must be inherited.
-class TestPlugin < CapacityKeeper::Plugin
+class TestPlugin < ::CapacityKeeper::Plugin
 
   # Define class original configs
   config :max, 10
@@ -234,7 +234,6 @@ class TestPlugin < CapacityKeeper::Plugin
 :
 :
 ```
-
 
 
 ## Development

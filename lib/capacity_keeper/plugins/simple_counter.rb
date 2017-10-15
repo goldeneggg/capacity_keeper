@@ -6,10 +6,13 @@ module CapacityKeeper::Plugins
     @@counter = 0
 
     # @override
+    #
+    # @return [Boolean] if counter exceeds maximum then false
     def performable?
       @@counter <= configs[:max]
     end
 
+    # @return [Integer] current counter value
     def self.counter
       @@counter
     end

@@ -7,6 +7,7 @@ module CapacityKeeper
     end
 
     module ClassMethods
+      # @return [Hash] config Hash
       def configs
         return @configs[self.name] if instance_variable_defined?(:@configs) && @configs.key?(self.name)
 
@@ -15,26 +16,33 @@ module CapacityKeeper
         @configs[self.name]
       end
 
-      def config(name, default_value = nil)
-        configs[name] = default_value
+      # @param [String] key config key
+      # @param [Object] default_value default config value
+      def config(key, default_value = nil)
+        configs[key] = default_value
       end
 
+      # @param [Integer] retry_count
       def retry_count(retry_count)
         config(:retry_count, retry_count)
       end
 
+      # @param [Integer] retry_interval_second
       def retry_interval_second(retry_interval_second)
         config(:retry_interval_second, retry_interval_second)
       end
 
+      # @param [Boolean] raise_on_retry_fail
       def raise_on_retry_fail(raise_on_retry_fail)
         config(:raise_on_retry_fail, raise_on_retry_fail)
       end
 
+      # @param [Logger] logger
       def logger(logger)
         config(:logger, logger)
       end
 
+      # @param [Boolean] verbose
       def verbose(verbose)
         config(:verbose, verbose)
       end
