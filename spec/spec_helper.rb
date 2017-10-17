@@ -34,6 +34,7 @@ class OtherKeeper < CapacityKeeper::Plugin
   verbose true
 
   config :performable_str, "test"
+  config :test_val, 20
 
   @@state = "test"
 

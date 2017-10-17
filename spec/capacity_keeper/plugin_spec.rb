@@ -146,4 +146,16 @@ describe CapacityKeeper::Plugin do
       end
     end
   end
+
+  describe '#config' do
+    context 'when config is overrided' do
+      before(:each) do
+        OtherKeeper.config :test_val, 30
+      end
+
+      it 'should be returned overrided config value' do
+          expect(plugin2.configs[:test_val]).to eq(30)
+      end
+    end
+  end
 end

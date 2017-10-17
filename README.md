@@ -207,7 +207,7 @@ CapacityKeeper.configure do |config|
 
   config.raise_on_retry_fail = false
 
-  config.verbose = ::Logger.new(STDOUT)
+  config.logger = ::Logger.new(STDOUT)
 
   config.verbose = false
 end
