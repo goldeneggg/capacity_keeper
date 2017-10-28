@@ -13,11 +13,24 @@ module CapacityKeeper
     end
 
     # before block execution
+    def before
+      lock
+      @locked = true
+    end
+
+    # after block execution
+    def after
+      unlock if @locked
+    end
+
+    private
+
+    # execute lock in before execution
     def lock
       raise NotImplementedError.new("must be override")
     end
 
-    # after block execution
+    # execute unlock in after execution
     def unlock
       raise NotImplementedError.new("must be override")
     end

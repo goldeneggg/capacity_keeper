@@ -44,17 +44,17 @@ module CapacityKeeper
 
       begin
         @plugins.each do |plugin|
-          plugin.lock
-          plugin.log_verbose("lock")
+          plugin.before
+          plugin.log_verbose("do before")
         end
         yield
       ensure
         @plugins.each do |plugin|
           begin
-            plugin.unlock
-            plugin.log_verbose("unlock")
+            plugin.after
+            plugin.log_verbose("do after")
           rescue => ex
-            plugin.log_verbose("failed to unlock. exception:#{ex.class.name}, message:#{ex.message}")
+            plugin.log_verbose("failed to do after. exception:#{ex.class.name}, message:#{ex.message}")
           end
         end
       end
