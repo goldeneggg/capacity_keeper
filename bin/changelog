@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+declare -r BINDIR=vendor/bundle/ruby/2.3.0/bin
+declare -r GH_USER=goldeneggg
+declare -r GH_PRJ=capacity_keeper
+
+${BINDIR}/github_changelog_generator -u ${GH_USER} -p ${GH_PRJ}

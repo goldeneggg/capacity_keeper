@@ -18,6 +18,7 @@ Gem::Specification.new do |spec|
   if spec.respond_to?(:metadata)
     spec.metadata["homepage_uri"] = spec.homepage
     spec.metadata["source_code_uri"] = "https://github.com/goldeneggg/capacity_keeper"
+    spec.metadata["changelog_uri"] = "https://github.com/goldeneggg/capacity_keeper/blob/master/CHANGELOG.md"
   else
     raise "RubyGems 2.0 or newer is required to protect against " \
       "public gem pushes."
@@ -39,4 +40,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'pry-byebug', '~> 3.6.0'
   spec.add_development_dependency 'pry-doc', '~> 1.0.0'
   spec.add_development_dependency 'pry-theme', '~> 1.2.0'
+  spec.add_development_dependency 'github_changelog_generator', '~> 1.14.0'
 end

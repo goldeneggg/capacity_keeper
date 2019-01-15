@@ -255,6 +255,12 @@ $ bin/console
 
 To release a new version, update the version number in `version.rb`.
 
+Generate new CHANGELOG.md
+
+
+```bash
+$ bin/changelog
+```
 
 ## Contributing
 
