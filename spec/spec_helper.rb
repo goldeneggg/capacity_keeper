@@ -20,6 +20,8 @@ class DefaultConfigKeeper < CapacityKeeper::Plugin
     @state == runtime_state
   end
 
+  private
+
   # @override
   def begin_process
     @state = "lock"
@@ -53,6 +55,8 @@ class OtherKeeper < CapacityKeeper::Plugin
     runtime_state = @opts[:performable_str] || configs[:performable_str]
     @state == runtime_state
   end
+
+  private
 
   # @override
   def begin_process
