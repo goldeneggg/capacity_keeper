@@ -30,6 +30,7 @@ module CapacityKeeper
     end
 
     # @param [Class] plugin plugin class
+    # @return [Object] if block_given then some return object from assigned block, else self
     def add_plugin(plugin, &block)
       @plugins << plugin.new(opts: @opts)
 
@@ -44,17 +45,17 @@ module CapacityKeeper
 
       begin
         @plugins.each do |plugin|
-          plugin.lock
-          plugin.log_verbose("lock")
+          plugin.before
+          plugin.log_verbose("do before")
         end
         yield
       ensure
         @plugins.each do |plugin|
           begin
-            plugin.unlock
-            plugin.log_verbose("unlock")
+            plugin.after
+            plugin.log_verbose("do after")
           rescue => ex
-            plugin.log_verbose("failed to unlock. exception:#{ex.class.name}, message:#{ex.message}")
+            plugin.log_verbose("failed to do after. exception:#{ex.class.name}, message:#{ex.message}")
           end
         end
       end
@@ -73,9 +74,11 @@ module CapacityKeeper
             plugin.log_verbose("ok performable")
             break
           end
+
           plugin.log_verbose("sleep for #{plugin.retry_interval_second} second from now on")
           sleep(plugin.retry_interval_second)
         end
+
         plugin.log_verbose("break retry loop. performable=#{performable}")
         next if performable
 

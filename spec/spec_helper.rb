@@ -5,24 +5,31 @@ require 'pry'
 
 class DefaultConfigKeeper < CapacityKeeper::Plugin
 
-  config :performable_str, "test"
+  config :performable_str, "unlock"
 
-  @@state = "test"
+  attr_reader :state
+
+  def initialize(opts: {})
+    super
+    @state = 'unlock'
+  end
 
   # @override
   def performable?
     runtime_state = @opts[:performable_str] || configs[:performable_str]
-    @@state == runtime_state
+    @state == runtime_state
+  end
+
+  private
+
+  # @override
+  def begin_process
+    @state = "lock"
   end
 
   # @override
-  def lock
-    @@state = "lock"
-  end
-
-  # @override
-  def unlock
-    @@state = configs[:performable_str]
+  def finish_process
+    @state = configs[:performable_str]
   end
 end
 
@@ -33,24 +40,31 @@ class OtherKeeper < CapacityKeeper::Plugin
   raise_on_retry_fail true
   verbose true
 
-  config :performable_str, "test"
+  config :performable_str, "unlock"
   config :test_val, 20
 
-  @@state = "test"
+  attr_reader :state
+
+  def initialize(opts: {})
+    super
+    @state = 'unlock'
+  end
 
   # @override
   def performable?
     runtime_state = @opts[:performable_str] || configs[:performable_str]
-    @@state == runtime_state
+    @state == runtime_state
+  end
+
+  private
+
+  # @override
+  def begin_process
+    @state = "lock"
   end
 
   # @override
-  def lock
-    @@state = "lock"
-  end
-
-  # @override
-  def unlock
-    @@state = configs[:performable_str]
+  def finish_process
+    @state = configs[:performable_str]
   end
 end

@@ -13,12 +13,32 @@ module CapacityKeeper
     end
 
     # before block execution
-    def lock
-      raise NotImplementedError.new("must be override")
+    def before
+      @beginning = true
+      begin_process
     end
 
     # after block execution
-    def unlock
+    def after
+      if beginning?
+        @beginning = false
+        finish_process
+      end
+    end
+
+    def beginning?
+      @beginning || false
+    end
+
+    private
+
+    # begin assigned block
+    def begin_process
+      raise NotImplementedError.new("must be override")
+    end
+
+    # finish assigned block
+    def finish_process
       raise NotImplementedError.new("must be override")
     end
   end

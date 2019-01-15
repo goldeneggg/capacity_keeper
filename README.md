@@ -12,7 +12,7 @@ If this method call is system-unfriendly
 innocent_method
 ```
 
-↓ By using `capacity_keeper gem`, this may change to be system-friendly
+↓ By using `capacity_keepe` gem, this may change to be system-friendly
 
 ```ruby
 within_capacity(plugin: TestPlugin) do
@@ -41,8 +41,8 @@ Or install it yourself as:
 ## Simple Usage
 
 First, you need to implement plugin class of capacity_keeper.
-Your plugin class must be inherit `CapacityKeeper::Plugin` class,
-and override `performable?`, `lock` and `unlock` abstract methods.
+Your plugin class must be inherited `CapacityKeeper::Plugin` class,
+and override `performable?`, `begin_process` and `finish_process` abstract methods.
 
 Example of plugin implementation as follows
 
@@ -61,14 +61,16 @@ class TestPlugin < CapacityKeeper::Plugin
     @@counter <= configs[:max]
   end
 
+  private
+
   # @override
-  def lock
+  def begin_process
     # enqueue counter
     @@counter += 1
   end
 
   # @override
-  def unlock
+  def finish_process
     # dequeue counter
     @@counter -= 1 if @@counter > 0
   end
@@ -98,12 +100,12 @@ end
 
 1. Execute `performable?` of your plugin implementation for capacity satisfation check
 1. If performable,
-    1. Execute `lock` of your plugin implementation
+    1. Execute `before` of your plugin implementation
     1. __Execute your assigned block__
-    1. Execute `unlock` of your plugin implementation
+    1. Execute `after` of your plugin implementation
 
 
-## Use runtime options
+## Use dynamic runtime options
 
 If your plugin class want to refer `@opts` variable, please assign `opts` argument of `within_capacity` method calling.
 
@@ -136,13 +138,15 @@ class TestPlugin < CapacityKeeper::Plugin
     @@counter <= configs[:max]
   end
 
+  private
+
   # @override
-  def lock
+  def begin_process
     @@counter += 1
   end
 
   # @override
-  def unlock
+  def finish_process
     @@counter -= 1 if @@counter > 0
   end
 end
@@ -166,13 +170,13 @@ end
 1. Execute `performable?` of PluginB for capacity satisfation check
 1. Execute `performable?` of PluginC for capacity satisfation check
 1. If performable on all plugins,
-    1. Execute `lock` of PluginA
-    1. Execute `lock` of PluginB
-    1. Execute `lock` of PluginC
+    1. Execute `before` of PluginA
+    1. Execute `before` of PluginB
+    1. Execute `before` of PluginC
     1. __Execute your assigned block__
-    1. Execute `unlock` of PluginA
-    1. Execute `unlock` of PluginB
-    1. Execute `unlock` of PluginC
+    1. Execute `after` of PluginA
+    1. Execute `after` of PluginB
+    1. Execute `after` of PluginC
 
 ### Add some plugins under specific conditions
 
@@ -182,9 +186,11 @@ if you want to add some plugins under specific conditions, you can use `Capacity
 str = 'C'
 
 keepers = within_capacity(plugin: PluginA)
+
 if str == 'B'
   keepers.add_plugin(PluginB)
 end
+
 if str == 'C'
   keepers.add_plugin(PluginC)
 end
@@ -255,6 +261,12 @@ $ bin/console
 
 To release a new version, update the version number in `version.rb`.
 
+Generate new CHANGELOG.md
+
+
+```bash
+$ bin/changelog
+```
 
 ## Contributing
 
