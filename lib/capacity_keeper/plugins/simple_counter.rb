@@ -10,18 +10,20 @@ module CapacityKeeper::Plugins
       @@counter <= configs[:max]
     end
 
+    def self.counter
+      @@counter
+    end
+
+    private
+
     # @override
-    def lock
+    def begin_process
       @@counter += 1
     end
 
     # @override
-    def unlock
+    def finish_process
       @@counter -= 1 if @@counter > 0
-    end
-
-    def self.counter
-      @@counter
     end
   end
 end

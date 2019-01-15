@@ -17,17 +17,44 @@ describe CapacityKeeper::Plugin do
     end
   end
 
-  describe '#lock' do
+  describe '#before' do
     it 'should change capacity state' do
-      plugin.lock
-      expect(plugin.class.class_variable_get(:@@state)).to eq('lock')
+      plugin.before
+      expect(plugin.state).to eq('lock')
     end
   end
 
-  describe '#unlock' do
-    it 'should change capacity state' do
-      plugin.unlock
-      expect(plugin.class.class_variable_get(:@@state)).to eq(plugin.configs[:performable_str])
+  describe '#after' do
+    context 'when before was called beforehand' do
+      before(:each) do
+        plugin.before
+      end
+
+      it 'should change capacity state' do
+        plugin.after
+        expect(plugin.state).to eq(plugin.configs[:performable_str])
+      end
+    end
+
+    context 'when before was not called beforehand' do
+      it 'should not change capacity state' do
+        plugin.after
+        expect(plugin.state).to eq('unlock')
+      end
+    end
+  end
+
+  describe '#beginning?' do
+    subject{ plugin.beginning? }
+
+    context 'when before was called but after was not called' do
+      before(:each) do
+        plugin.before
+      end
+
+      it 'should be truthy' do
+        is_expected.to be_truthy
+      end
     end
   end
 

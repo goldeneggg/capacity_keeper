@@ -49,10 +49,10 @@ describe CapacityKeeper do
       context 'when capacity is performable' do
         it 'should be exected immediately' do
           expect_any_instance_of(Kernel).not_to receive(:sleep)
-          expect_any_instance_of(DefaultConfigKeeper).to receive(:lock)
-          expect_any_instance_of(OtherKeeper).to receive(:lock)
-          expect_any_instance_of(DefaultConfigKeeper).to receive(:unlock)
-          expect_any_instance_of(OtherKeeper).to receive(:unlock)
+          expect_any_instance_of(DefaultConfigKeeper).to receive(:before)
+          expect_any_instance_of(OtherKeeper).to receive(:before)
+          expect_any_instance_of(DefaultConfigKeeper).to receive(:after)
+          expect_any_instance_of(OtherKeeper).to receive(:after)
           is_expected.to eq(block_result)
         end
       end

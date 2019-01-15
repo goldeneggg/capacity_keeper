@@ -30,6 +30,7 @@ module CapacityKeeper
     end
 
     # @param [Class] plugin plugin class
+    # @return [Object] if block_given then some return object from assigned block, else self
     def add_plugin(plugin, &block)
       @plugins << plugin.new(opts: @opts)
 
@@ -73,9 +74,11 @@ module CapacityKeeper
             plugin.log_verbose("ok performable")
             break
           end
+
           plugin.log_verbose("sleep for #{plugin.retry_interval_second} second from now on")
           sleep(plugin.retry_interval_second)
         end
+
         plugin.log_verbose("break retry loop. performable=#{performable}")
         next if performable
 

@@ -14,24 +14,31 @@ module CapacityKeeper
 
     # before block execution
     def before
-      lock
-      @locked = true
+      @beginning = true
+      begin_process
     end
 
     # after block execution
     def after
-      unlock if @locked
+      if beginning?
+        @beginning = false
+        finish_process
+      end
+    end
+
+    def beginning?
+      @beginning || false
     end
 
     private
 
-    # execute lock in before execution
-    def lock
+    # begin assigned block
+    def begin_process
       raise NotImplementedError.new("must be override")
     end
 
-    # execute unlock in after execution
-    def unlock
+    # finish assigned block
+    def finish_process
       raise NotImplementedError.new("must be override")
     end
   end
