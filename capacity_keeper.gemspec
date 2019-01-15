@@ -27,10 +27,10 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_development_dependency "bundler", "~> 1.15"
-  spec.add_development_dependency "rake", "~> 12.0.0"
-  spec.add_development_dependency "rspec", "~> 3.6.0"
-  spec.add_development_dependency 'pry', '~> 0.10.4'
-  spec.add_development_dependency 'pry-byebug', '~> 3.5.0'
-  spec.add_development_dependency 'pry-doc', '~> 0.11.1'
+  spec.add_development_dependency "rake", "~> 12.3.0"
+  spec.add_development_dependency "rspec", "~> 3.8.0"
+  spec.add_development_dependency 'pry', '~> 0.12.0'
+  spec.add_development_dependency 'pry-byebug', '~> 3.6.0'
+  spec.add_development_dependency 'pry-doc', '~> 1.0.0'
   spec.add_development_dependency 'pry-theme', '~> 1.2.0'
 end
