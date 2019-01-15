@@ -42,7 +42,7 @@ Or install it yourself as:
 
 First, you need to implement plugin class of capacity_keeper.
 Your plugin class must be inherit `CapacityKeeper::Plugin` class,
-and override `performable?`, `lock` and `unlock` abstract methods.
+and override `performable?`, `begin_process` and `finish_process` abstract methods.
 
 Example of plugin implementation as follows
 
@@ -62,13 +62,13 @@ class TestPlugin < CapacityKeeper::Plugin
   end
 
   # @override
-  def lock
+  def begin_process
     # enqueue counter
     @@counter += 1
   end
 
   # @override
-  def unlock
+  def finish_process
     # dequeue counter
     @@counter -= 1 if @@counter > 0
   end
@@ -98,9 +98,9 @@ end
 
 1. Execute `performable?` of your plugin implementation for capacity satisfation check
 1. If performable,
-    1. Execute `lock` of your plugin implementation
+    1. Execute `before` of your plugin implementation
     1. __Execute your assigned block__
-    1. Execute `unlock` of your plugin implementation
+    1. Execute `after` of your plugin implementation
 
 
 ## Use runtime options
@@ -137,12 +137,12 @@ class TestPlugin < CapacityKeeper::Plugin
   end
 
   # @override
-  def lock
+  def begin_process
     @@counter += 1
   end
 
   # @override
-  def unlock
+  def finish_process
     @@counter -= 1 if @@counter > 0
   end
 end
@@ -166,13 +166,13 @@ end
 1. Execute `performable?` of PluginB for capacity satisfation check
 1. Execute `performable?` of PluginC for capacity satisfation check
 1. If performable on all plugins,
-    1. Execute `lock` of PluginA
-    1. Execute `lock` of PluginB
-    1. Execute `lock` of PluginC
+    1. Execute `before` of PluginA
+    1. Execute `before` of PluginB
+    1. Execute `before` of PluginC
     1. __Execute your assigned block__
-    1. Execute `unlock` of PluginA
-    1. Execute `unlock` of PluginB
-    1. Execute `unlock` of PluginC
+    1. Execute `after` of PluginA
+    1. Execute `after` of PluginB
+    1. Execute `after` of PluginC
 
 ### Add some plugins under specific conditions
 
