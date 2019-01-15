@@ -12,7 +12,7 @@ If this method call is system-unfriendly
 innocent_method
 ```
 
-↓ By using `capacity_keeper gem`, this may change to be system-friendly
+↓ By using `capacity_keepe` gem, this may change to be system-friendly
 
 ```ruby
 within_capacity(plugin: TestPlugin) do
@@ -41,7 +41,7 @@ Or install it yourself as:
 ## Simple Usage
 
 First, you need to implement plugin class of capacity_keeper.
-Your plugin class must be inherit `CapacityKeeper::Plugin` class,
+Your plugin class must be inherited `CapacityKeeper::Plugin` class,
 and override `performable?`, `begin_process` and `finish_process` abstract methods.
 
 Example of plugin implementation as follows
@@ -60,6 +60,8 @@ class TestPlugin < CapacityKeeper::Plugin
     # check current counter is not over max value
     @@counter <= configs[:max]
   end
+
+  private
 
   # @override
   def begin_process
@@ -103,7 +105,7 @@ end
     1. Execute `after` of your plugin implementation
 
 
-## Use runtime options
+## Use dynamic runtime options
 
 If your plugin class want to refer `@opts` variable, please assign `opts` argument of `within_capacity` method calling.
 
@@ -135,6 +137,8 @@ class TestPlugin < CapacityKeeper::Plugin
     puts @opts.inspect  # @opts variable can be refered => { hello: 'world' }
     @@counter <= configs[:max]
   end
+
+  private
 
   # @override
   def begin_process
@@ -182,9 +186,11 @@ if you want to add some plugins under specific conditions, you can use `Capacity
 str = 'C'
 
 keepers = within_capacity(plugin: PluginA)
+
 if str == 'B'
   keepers.add_plugin(PluginB)
 end
+
 if str == 'C'
   keepers.add_plugin(PluginC)
 end
