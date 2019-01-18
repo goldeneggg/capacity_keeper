@@ -1,5 +1,5 @@
 module CapacityKeeper
-  module Pluggable
+  module Keepable
     include ::CapacityKeeper::Errors
 
     def self.included(base)
