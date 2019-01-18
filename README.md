@@ -12,7 +12,7 @@ If this method call is system-unfriendly
 innocent_method
 ```
 
-↓ By using `capacity_keepe` gem, this may change to be system-friendly
+↓ By using `capacity_keeper` gem, this may change to be system-friendly
 
 ```ruby
 within_capacity(keeper: TestKeeper) do
