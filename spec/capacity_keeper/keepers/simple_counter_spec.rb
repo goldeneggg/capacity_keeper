@@ -1,13 +1,13 @@
 require 'spec_helper'
 
-describe CapacityKeeper::Plugins::SimpleCounter do
+describe CapacityKeeper::Keepers::SimpleCounter do
   before(:each) do
     allow(Kernel).to receive(:sleep)
   end
 
-  describe 'plugin methods' do
+  describe 'keeper methods' do
     context 'when capacity control is valid' do
-      class PluginTest
+      class KeeperTest
         include CapacityKeeper
 
         attr_reader :idx
@@ -17,13 +17,13 @@ describe CapacityKeeper::Plugins::SimpleCounter do
         end
 
         def test_method(opts = {})
-          within_capacity(plugin: CapacityKeeper::Plugins::SimpleCounter, opts: opts) do
+          within_capacity(keeper: CapacityKeeper::Keepers::SimpleCounter, opts: opts) do
             @idx += 1
           end
         end
       end
 
-      let(:instance) { PluginTest.new }
+      let(:instance) { KeeperTest.new }
       let(:opts) { {} }
 
       it 'should finish capacity_keeped method validly' do
@@ -32,7 +32,7 @@ describe CapacityKeeper::Plugins::SimpleCounter do
         end
 
         expect(instance.idx).to eq(11)
-        expect(CapacityKeeper::Plugins::SimpleCounter.counter).to eq(0)
+        expect(CapacityKeeper::Keepers::SimpleCounter.counter).to eq(0)
       end
     end
   end

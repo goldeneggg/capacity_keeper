@@ -1,5 +1,5 @@
-module CapacityKeeper::Plugins
-  class SimpleCounter < CapacityKeeper::Plugin
+module CapacityKeeper::Keepers
+  class SimpleCounter < CapacityKeeper::Keeper
 
     config :max, 10
 

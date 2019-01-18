@@ -28,12 +28,12 @@ describe CapacityKeeper do
     end
   end
 
-  describe '#add_plugin' do
+  describe '#add' do
     subject {
       instance.
       send(:within_capacity, opts: opts).
-      send(:add_plugin, DefaultConfigKeeper).
-      send(:add_plugin, OtherKeeper) { block_result }
+      send(:add, DefaultConfigKeeper).
+      send(:add, OtherKeeper) { block_result }
     }
 
     let(:instance) { include_class.new }

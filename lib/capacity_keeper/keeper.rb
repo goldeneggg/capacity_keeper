@@ -1,6 +1,6 @@
 module CapacityKeeper
-  class Plugin
-    include CapacityKeeper::Pluggable
+  class Keeper
+    include CapacityKeeper::Keepable
     include CapacityKeeper::Errors
 
     def initialize(opts: {})

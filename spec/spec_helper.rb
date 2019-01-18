@@ -3,7 +3,7 @@ require 'capacity_keeper'
 
 require 'pry'
 
-class DefaultConfigKeeper < CapacityKeeper::Plugin
+class DefaultConfigKeeper < CapacityKeeper::Keeper
 
   config :performable_str, "unlock"
 
@@ -33,7 +33,7 @@ class DefaultConfigKeeper < CapacityKeeper::Plugin
   end
 end
 
-class OtherKeeper < CapacityKeeper::Plugin
+class OtherKeeper < CapacityKeeper::Keeper
 
   retry_count 10
   retry_interval_second 10

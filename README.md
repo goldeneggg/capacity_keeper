@@ -15,7 +15,7 @@ innocent_method
 ↓ By using `capacity_keepe` gem, this may change to be system-friendly
 
 ```ruby
-within_capacity(plugin: TestPlugin) do
+within_capacity(keeper: TestKeeper) do
   innocent_method
 end
 ```
@@ -40,15 +40,15 @@ Or install it yourself as:
 
 ## Simple Usage
 
-First, you need to implement plugin class of capacity_keeper.
-Your plugin class must be inherited `CapacityKeeper::Plugin` class,
+First, you need to implement keeper class of capacity_keeper.
+Your keeper class must be inherited `CapacityKeeper::Keeper` class,
 and override `performable?`, `begin_process` and `finish_process` abstract methods.
 
-Example of plugin implementation as follows
+Example of keeper implementation as follows
 
 ```ruby
-# CapacityKeeper::Plugin must be inherited.
-class TestPlugin < CapacityKeeper::Plugin
+# CapacityKeeper::Keeper must be inherited.
+class TestKeeper < CapacityKeeper::Keeper
 
   # Define class original configs
   config :max, 10
@@ -87,8 +87,8 @@ class Example
   include CapacityKeeper
 
   def xxx
-    # enclose with within_capacity method, and assign plugin class for keeping capacity
-    within_capacity(plugin: TestPlugin) do
+    # enclose with within_capacity method, and assign keeper class for keeping capacity
+    within_capacity(keeper: TestKeeper) do
       # some system-unfriendly method
       innocent_method
     end
@@ -98,16 +98,16 @@ end
 
 ### Exection sequence
 
-1. Execute `performable?` of your plugin implementation for capacity satisfation check
+1. Execute `performable?` of your keeper implementation for capacity satisfation check
 1. If performable,
-    1. Execute `before` of your plugin implementation
+    1. Execute `before` of your keeper implementation
     1. __Execute your assigned block__
-    1. Execute `after` of your plugin implementation
+    1. Execute `after` of your keeper implementation
 
 
 ## Use dynamic runtime options
 
-If your plugin class want to refer `@opts` variable, please assign `opts` argument of `within_capacity` method calling.
+If your keeper class want to refer `@opts` variable, please assign `opts` argument of `within_capacity` method calling.
 
 ```ruby
 require 'capacity_keeper'
@@ -116,17 +116,17 @@ class Example
   include CapacityKeeper
 
   def xxx
-    within_capacity(plugin: TestPlugin, opts: { hello: 'world' }) do
+    within_capacity(keeper: TestKeeper, opts: { hello: 'world' }) do
       innocent_method
     end
   end
 end
 ```
 
-`@opts` variable can be refered from your plugin class.
+`@opts` variable can be refered from your keeper class.
 
 ```ruby
-class TestPlugin < CapacityKeeper::Plugin
+class TestKeeper < CapacityKeeper::Keeper
 
   config :max, 10
 
@@ -153,50 +153,50 @@ end
 ```
 
 
-## Capacity keeping with multi plugins
+## Capacity keeping with multi keepers
 
-You can assign multi plugins by calling `add_plugin` method.
+You can assign multi keepers by calling `add_keeper` method.
 
 ```ruby
-within_capacity(plugin: PluginA).add_plugin(PluginB).add_plugin(PluginC) do
-  # applied PluginA and PluginB and PluginC
+within_capacity(keeper: KeeperA).add_keeper(KeeperB).add_keeper(KeeperC) do
+  # applied KeeperA and KeeperB and KeeperC
   innocent_method
 end
 ```
 
 ### Exection sequence
 
-1. Execute `performable?` of PluginA for capacity satisfation check
-1. Execute `performable?` of PluginB for capacity satisfation check
-1. Execute `performable?` of PluginC for capacity satisfation check
-1. If performable on all plugins,
-    1. Execute `before` of PluginA
-    1. Execute `before` of PluginB
-    1. Execute `before` of PluginC
+1. Execute `performable?` of KeeperA for capacity satisfation check
+1. Execute `performable?` of KeeperB for capacity satisfation check
+1. Execute `performable?` of KeeperC for capacity satisfation check
+1. If performable on all keeperList,
+    1. Execute `before` of KeeperA
+    1. Execute `before` of KeeperB
+    1. Execute `before` of KeeperC
     1. __Execute your assigned block__
-    1. Execute `after` of PluginA
-    1. Execute `after` of PluginB
-    1. Execute `after` of PluginC
+    1. Execute `after` of KeeperA
+    1. Execute `after` of KeeperB
+    1. Execute `after` of KeeperC
 
-### Add some plugins under specific conditions
+### Add some keepers under specific conditions
 
-if you want to add some plugins under specific conditions, you can use `CapacityKeeper::Keepers#perform` method.
+if you want to add some keepers under specific conditions, you can use `CapacityKeeper::KeeperList#perform` method.
 
 ```ruby
 str = 'C'
 
-keepers = within_capacity(plugin: PluginA)
+keeper_list = within_capacity(keeper: KeeperA)
 
 if str == 'B'
-  keepers.add_plugin(PluginB)
+  keeper_list.add_keeper(KeeperB)
 end
 
 if str == 'C'
-  keepers.add_plugin(PluginC)
+  keeper_list.add_keeper(KeeperC)
 end
 
-keepers.perform do
-  # applied PluginA and PluginC
+keeper_list.perform do
+  # applied KeeperA and KeeperC
   innocent_method
 end
 ```
@@ -222,7 +222,7 @@ end
 Override class original configs
 
 ```ruby
-class TestPlugin < CapacityKeeper::Plugin
+class TestKeeper < CapacityKeeper::Keeper
 
   # Override default configs by class original values
   retry_count 10
