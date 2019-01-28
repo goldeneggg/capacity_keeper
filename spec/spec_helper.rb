@@ -5,7 +5,7 @@ require 'pry'
 
 class DefaultConfigKeeper < CapacityKeeper::Keeper
 
-  config :performable_str, "unlock"
+  set_config :performable_str, "unlock"
 
   attr_reader :state
 
@@ -16,7 +16,7 @@ class DefaultConfigKeeper < CapacityKeeper::Keeper
 
   # @override
   def performable?
-    runtime_state = @opts[:performable_str] || configs[:performable_str]
+    runtime_state = @opts[:performable_str] || config[:performable_str]
     @state == runtime_state
   end
 
@@ -29,7 +29,7 @@ class DefaultConfigKeeper < CapacityKeeper::Keeper
 
   # @override
   def finish_process
-    @state = configs[:performable_str]
+    @state = config[:performable_str]
   end
 end
 
@@ -40,8 +40,8 @@ class OtherKeeper < CapacityKeeper::Keeper
   raise_on_retry_fail true
   verbose true
 
-  config :performable_str, "unlock"
-  config :test_val, 20
+  set_config :performable_str, "unlock"
+  set_config :test_val, 20
 
   attr_reader :state
 
@@ -52,7 +52,7 @@ class OtherKeeper < CapacityKeeper::Keeper
 
   # @override
   def performable?
-    runtime_state = @opts[:performable_str] || configs[:performable_str]
+    runtime_state = @opts[:performable_str] || config[:performable_str]
     @state == runtime_state
   end
 
@@ -65,6 +65,6 @@ class OtherKeeper < CapacityKeeper::Keeper
 
   # @override
   def finish_process
-    @state = configs[:performable_str]
+    @state = config[:performable_str]
   end
 end

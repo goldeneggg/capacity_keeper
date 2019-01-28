@@ -11,8 +11,8 @@ describe CapacityKeeper::Keeper do
       it 'should be initialized correctly' do
         ms = keeper.class.singleton_methods
         expect(ms.size).to eq(8)
-        expect(ms.include?(:configs)).to be_truthy
         expect(ms.include?(:config)).to be_truthy
+        expect(ms.include?(:set_config)).to be_truthy
       end
     end
   end
@@ -32,7 +32,7 @@ describe CapacityKeeper::Keeper do
 
       it 'should change capacity state' do
         keeper.after
-        expect(keeper.state).to eq(keeper.configs[:performable_str])
+        expect(keeper.state).to eq(keeper.config[:performable_str])
       end
     end
 
@@ -154,34 +154,34 @@ describe CapacityKeeper::Keeper do
     end
   end
 
-  describe '#configs' do
-    subject{ test_keeper.configs }
+  describe '#config' do
+    subject{ test_keeper.config }
 
     context 'when keeper is DefaultConfigKeeper' do
       let(:test_keeper) { keeper }
 
-      it 'should be returned class configs' do
-        expect(subject).to eq(test_keeper.class.configs)
+      it 'should be returned class config' do
+        expect(subject).to eq(test_keeper.class.config)
       end
     end
 
     context 'when keeper is OtherKeeper' do
       let(:test_keeper) { keeper2 }
 
-      it 'should be returned class configs' do
-        expect(subject).to eq(test_keeper.class.configs)
+      it 'should be returned class config' do
+        expect(subject).to eq(test_keeper.class.config)
       end
     end
   end
 
-  describe '#config' do
-    context 'when config is overrided' do
+  describe '#set_config' do
+    context 'when set_config is overrided' do
       before(:each) do
-        OtherKeeper.config :test_val, 30
+        OtherKeeper.set_config :test_val, 30
       end
 
       it 'should be returned overrided config value' do
-          expect(keeper2.configs[:test_val]).to eq(30)
+          expect(keeper2.config[:test_val]).to eq(30)
       end
     end
   end
