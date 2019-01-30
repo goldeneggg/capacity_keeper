@@ -50,15 +50,15 @@ Example of keeper implementation as follows
 # CapacityKeeper::Keeper must be inherited.
 class TestKeeper < CapacityKeeper::Keeper
 
-  # Define class original configs
-  config :max, 10
+  # Define class original config
+  set_config :max, 10
 
   @@counter = 0
 
   # @override
   def performable?
-    # check current counter is not over max value
-    @@counter <= configs[:max]
+    # check current counter is not over max value using ":max" config value
+    @@counter <= config[:max]
   end
 
   private
@@ -128,14 +128,14 @@ end
 ```ruby
 class TestKeeper < CapacityKeeper::Keeper
 
-  config :max, 10
+  set_config :max, 10
 
   @@counter = 0
 
   # @override
   def performable?
     puts @opts.inspect  # @opts variable can be refered => { hello: 'world' }
-    @@counter <= configs[:max]
+    @@counter <= config[:max]
   end
 
   private

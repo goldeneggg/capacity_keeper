@@ -1,13 +1,13 @@
 module CapacityKeeper::Keepers
   class SimpleCounter < CapacityKeeper::Keeper
 
-    config :max, 10
+    set_config :max, 10
 
     @@counter = 0
 
     # @override
     def performable?
-      @@counter <= configs[:max]
+      @@counter <= config[:max]
     end
 
     def self.counter

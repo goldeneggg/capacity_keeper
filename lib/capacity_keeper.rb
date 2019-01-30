@@ -76,6 +76,8 @@ module CapacityKeeper
           end
 
           keeper.log_verbose("sleep for #{keeper.retry_interval_second} second from now on")
+
+          # TODO: retry不要時はsleepせずにすぐに抜け出したい
           sleep(keeper.retry_interval_second)
         end
 
